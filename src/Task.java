@@ -1,7 +1,6 @@
 import java.util.Objects;
 
 public class Task {
-    private static int idCounter = 0;
     private String name;
     private String description;
     private Status status;
@@ -11,7 +10,6 @@ public class Task {
         this.name = name;
         this.description = description;
         this.status = status;
-        this.id = createId();
     }
 
     public String getName() {
@@ -44,14 +42,6 @@ public class Task {
 
     public void setId(int newId) {
         id = newId;
-    }
-
-    private static int createId() {
-        return idCounter++;
-    }
-
-    public void updateStatusByTask() {
-
     }
 
     @Override

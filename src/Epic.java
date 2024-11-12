@@ -2,6 +2,7 @@ import java.util.ArrayList;
 
 public class Epic extends Task{
     private final ArrayList<Integer> subtasks;
+    private TaskManager taskManager;
 
     public Epic(String name, String description, Status status) {
         super(name, description, status);
@@ -16,7 +17,7 @@ public class Epic extends Task{
         subtasks.add(id);
     }
 
-    public void updateStatusForEpic() {
+    public void updateStatusForEpic(TaskManager taskManager) {
         if (subtasks.isEmpty()) {
             setStatus(Status.NEW);
             return;
@@ -26,7 +27,7 @@ public class Epic extends Task{
         boolean isAllDone = true;
 
         for (int id : subtasks) {
-            Subtask subtask = TaskManager.getSubtaskById(id);
+            Subtask subtask = taskManager.getSubtaskById(id);
 
             if (subtask != null) {
                 if (subtask.getStatus() != Status.NEW) {

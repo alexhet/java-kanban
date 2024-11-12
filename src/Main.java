@@ -27,20 +27,18 @@ public class Main {
 
         epic2.addSubtaskId(subtask3.getId());
 
-        System.out.println("Список всех задач:");
-        taskManager.getAllTasks();
+        System.out.println("Список всех задач:\n" + taskManager.getAllTasks());
 
-        System.out.println("\nСписок всех эпиков:");
-        taskManager.getAllEpic();
+        System.out.println("\nСписок всех эпиков:\n" + taskManager.getAllEpic());
 
         System.out.println("\nСписок всех подзадач:");
         taskManager.getAllSubtask();
 
         //Изменение статуса задач и подзадач
-        taskManager.updateStatusByTask(task1.getId(), Status.IN_PROGRESS);
-        taskManager.updateStatusForSubtask(subtask1.getId(), Status.DONE);
-        taskManager.updateStatusForSubtask(subtask2.getId(), Status.IN_PROGRESS);
-        taskManager.updateStatusForSubtask(subtask3.getId(), Status.DONE);
+        taskManager.updateTask(task1, Status.IN_PROGRESS);
+        taskManager.updateSubtask(subtask1, Status.DONE);
+        taskManager.updateSubtask(subtask2, Status.IN_PROGRESS);
+        taskManager.updateSubtask(subtask3, Status.DONE);
 
         System.out.println("\nСтатусы после обновлений:");
         System.out.println("Task_1: " + task1);
