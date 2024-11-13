@@ -17,37 +17,7 @@ public class Epic extends Task{
         subtasks.add(id);
     }
 
-    public void updateStatusForEpic(TaskManager taskManager) {
-        if (subtasks.isEmpty()) {
-            setStatus(Status.NEW);
-            return;
-        }
 
-        boolean isAllNew = true;
-        boolean isAllDone = true;
-
-        for (int id : subtasks) {
-            Subtask subtask = taskManager.getSubtaskById(id);
-
-            if (subtask != null) {
-                if (subtask.getStatus() != Status.NEW) {
-                    isAllNew = false;
-                }
-                if (subtask.getStatus() != Status.DONE) {
-                    isAllDone = false;
-                }
-            }
-        }
-
-        if(isAllNew) {
-            setStatus(Status.NEW);
-        } else if (isAllDone) {
-            setStatus(Status.DONE);
-        } else {
-            setStatus(Status.IN_PROGRESS);
-        }
-
-    }
 
     @Override
     public String toString() {

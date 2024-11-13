@@ -35,10 +35,14 @@ public class Main {
         taskManager.getAllSubtask();
 
         //Изменение статуса задач и подзадач
-        taskManager.updateTask(task1, Status.IN_PROGRESS);
-        taskManager.updateSubtask(subtask1, Status.DONE);
-        taskManager.updateSubtask(subtask2, Status.IN_PROGRESS);
-        taskManager.updateSubtask(subtask3, Status.DONE);
+        task1.setStatus(Status.IN_PROGRESS);
+        taskManager.updateTask(task1);
+        subtask1.setStatus(Status.DONE);
+        taskManager.updateSubtask(subtask1);
+        subtask2.setStatus(Status.IN_PROGRESS);
+        taskManager.updateSubtask(subtask2);
+        subtask3.setStatus(Status.DONE);
+        taskManager.updateSubtask(subtask3);
 
         System.out.println("\nСтатусы после обновлений:");
         System.out.println("Task_1: " + task1);
