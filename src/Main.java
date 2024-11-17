@@ -3,44 +3,38 @@ public class Main {
     public static void main(String[] args) {
         TaskManager taskManager = new TaskManager();
 
-        Task task1 = new Task("Переезд в новую квартиру", "Упаковать вещи", Status.NEW);
-        Task task2 = new Task("Запись к врачу", "Записаться на прием.", Status.NEW);
+        Task task1 = new Task("Закупка продуктов", "Купить все для праздничного ужина.", Status.NEW);
+        Task task2 = new Task("Планирование тренировки", "Составить план тренировок на месяц.", Status.NEW);
         taskManager.addTask(task1);
         taskManager.addTask(task2);
 
-        Epic epic1 = new Epic("Подготовка к отпуску", "", Status.NEW);
+        Epic epic1 = new Epic("Подготовка к экзаменам", "Изучить все важные темы и материалы.", Status.NEW);
         taskManager.addEpic(epic1);
 
-        Subtask subtask1 = new Subtask("Забронировать билеты", "Выбрать даты и купить авиабилеты.", Status.NEW);
-        Subtask subtask2 = new Subtask("Найти жилье", "Поиск и бронирование отеля или квартиры.", Status.NEW);
-        taskManager.addSubtask(subtask1);
-        taskManager.addSubtask(subtask2);
+        Subtask subtask1 = new Subtask("Изучить лекции", "Посмотреть все лекции по теме.", Status.NEW);
+        Subtask subtask2 = new Subtask("Прочитать материалы", "", Status.NEW);
+        taskManager.addSubtask(subtask1, epic1.getId());
+        taskManager.addSubtask(subtask2, epic1.getId());
 
-        epic1.addSubtaskId(subtask1.getId());
-        epic1.addSubtaskId(subtask2.getId());
-
-        Epic epic2 = new Epic("Организация семейного праздника", "", Status.NEW);
+        Epic epic2 = new Epic("Организация конференции", "Подготовка к научной конференции.", Status.NEW);
         taskManager.addEpic(epic2);
 
-        Subtask subtask3 = new Subtask("Позвать гостей", "Подумать, кто будет приглашен", Status.NEW);
-        taskManager.addSubtask(subtask3);
-
-        epic2.addSubtaskId(subtask3.getId());
+        Subtask subtask3 = new Subtask("Забронировать зал", "Найти и забронировать зал для конференции.", Status.NEW);
+        taskManager.addSubtask(subtask3, epic2.getId());
 
         System.out.println("Список всех задач:\n" + taskManager.getAllTasks());
-
         System.out.println("\nСписок всех эпиков:\n" + taskManager.getAllEpic());
+        System.out.println("\nСписок всех подзадач:\n" + taskManager.getAllSubtask());
 
-        System.out.println("\nСписок всех подзадач:");
-        taskManager.getAllSubtask();
-
-        //Изменение статуса задач и подзадач
         task1.setStatus(Status.IN_PROGRESS);
         taskManager.updateTask(task1);
+
         subtask1.setStatus(Status.DONE);
         taskManager.updateSubtask(subtask1);
+
         subtask2.setStatus(Status.IN_PROGRESS);
         taskManager.updateSubtask(subtask2);
+
         subtask3.setStatus(Status.DONE);
         taskManager.updateSubtask(subtask3);
 
@@ -55,9 +49,9 @@ public class Main {
         taskManager.removeEpicById(epic1.getId());
 
         System.out.println("\nСписок всех задач после удаления:");
-        taskManager.getAllTasks();
+        System.out.println(taskManager.getAllTasks());
 
         System.out.println("\nСписок всех эпиков после удаления:");
-        taskManager.getAllEpic();
+        System.out.println(taskManager.getAllEpic());
     }
 }
