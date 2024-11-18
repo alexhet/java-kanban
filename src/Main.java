@@ -11,15 +11,15 @@ public class Main {
         Epic epic1 = new Epic("Подготовка к экзаменам", "Изучить все важные темы и материалы.", Status.NEW);
         taskManager.addEpic(epic1);
 
-        Subtask subtask1 = new Subtask("Изучить лекции", "Посмотреть все лекции по теме.", Status.NEW);
-        Subtask subtask2 = new Subtask("Прочитать материалы", "", Status.NEW);
+        Subtask subtask1 = new Subtask("Изучить лекции", "Посмотреть все лекции по теме.", Status.NEW, epic1.getId());
+        Subtask subtask2 = new Subtask("Прочитать материалы", "", Status.NEW, epic1.getId());
         taskManager.addSubtask(subtask1, epic1.getId());
         taskManager.addSubtask(subtask2, epic1.getId());
 
         Epic epic2 = new Epic("Организация конференции", "Подготовка к научной конференции.", Status.NEW);
         taskManager.addEpic(epic2);
 
-        Subtask subtask3 = new Subtask("Забронировать зал", "Найти и забронировать зал для конференции.", Status.NEW);
+        Subtask subtask3 = new Subtask("Забронировать зал", "Найти и забронировать зал для конференции.", Status.NEW, epic2.getId());
         taskManager.addSubtask(subtask3, epic2.getId());
 
         System.out.println("Список всех задач:\n" + taskManager.getAllTasks());
