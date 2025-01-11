@@ -1,10 +1,17 @@
+import managers.Managers;
+import managers.TaskManager;
+import tasks.Epic;
+import tasks.Status;
+import tasks.Subtask;
+import tasks.Task;
+
 public class Main {
 
     public static void main(String[] args) {
-        // Создаем TaskManager
+        // Создаем managers.TaskManager
         TaskManager taskManager = Managers.getDefault();
 
-        // Создаем задачи и добавляем их в TaskManager
+        // Создаем задачи и добавляем их в managers.TaskManager
         Task task1 = new Task("Закупка продуктов", "Купить все для праздничного ужина.", Status.NEW);
         Task task2 = new Task("Планирование тренировки", "Составить план тренировок на месяц.", Status.NEW);
         taskManager.addTask(task1);

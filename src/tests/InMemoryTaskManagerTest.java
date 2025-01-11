@@ -1,4 +1,13 @@
+package tests;
+
+import managers.InMemoryHistoryManager;
+import managers.InMemoryTaskManager;
+import managers.TaskManager;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import tasks.Status;
+import tasks.Task;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class InMemoryTaskManagerTest {
@@ -21,7 +30,7 @@ class InMemoryTaskManagerTest {
         Task task2 = new Task("Задача 2", "Описание 2", Status.NEW);
         taskManager.addTask(task2);
 
-        assertNotEquals(task1.getId(), task2.getId(), "ID не должны конфликтовать.");
+        Assertions.assertNotEquals(task1.getId(), task2.getId(), "ID не должны конфликтовать.");
     }
 
     @Test
@@ -31,8 +40,8 @@ class InMemoryTaskManagerTest {
         taskManager.addTask(task);
         Task retrievedTask = taskManager.getTask(task.getId());
 
-        assertEquals("Задача", retrievedTask.getName(), "Имя задачи должно оставаться неизменным.");
-        assertEquals("Описание", retrievedTask.getDescription(), "Описание задачи должно оставаться неизменным.");
-        assertEquals(Status.NEW, retrievedTask.getStatus(), "Статус задачи должен оставаться неизменным.");
+        Assertions.assertEquals("Задача", retrievedTask.getName(), "Имя задачи должно оставаться неизменным.");
+        Assertions.assertEquals("Описание", retrievedTask.getDescription(), "Описание задачи должно оставаться неизменным.");
+        Assertions.assertEquals(Status.NEW, retrievedTask.getStatus(), "Статус задачи должен оставаться неизменным.");
     }
 }
