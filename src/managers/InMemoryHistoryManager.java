@@ -23,7 +23,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     private int size = 0;
     private final Map<Integer, Node<Task>> historyMap = new HashMap<>();
 
-    public void addLast(Task task) {
+    private void addLast(Task task) {
         Node<Task> newNode = new Node<>(task);
         if (tail == null) {
             head = tail = newNode;
