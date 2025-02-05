@@ -5,22 +5,10 @@ import tasks.Task;
 import java.util.*;
 
 public class InMemoryHistoryManager implements HistoryManager {
-    static class Node<T> {
-
-        public T data;
-        public Node<T> next;
-        public Node<T> prev;
-        public Node(T data) {
-            this.data = data;
-            this.next = null;
-            this.prev = null;
-        }
-
-    }
     private Node<Task> head;
-
     private Node<Task> tail;
     private int size = 0;
+
     private final Map<Integer, Node<Task>> historyMap = new HashMap<>();
 
     private void addLast(Task task) {
@@ -41,9 +29,8 @@ public class InMemoryHistoryManager implements HistoryManager {
     public void add(Task task) {
         if (historyMap.containsKey(task.getId())) {
             remove(task.getId());
-        } else {
-            addLast(task);
         }
+        addLast(task);
     }
 
     @Override
@@ -79,5 +66,16 @@ public class InMemoryHistoryManager implements HistoryManager {
             current = current.next;
         }
         return tasks;
+    }
+
+    private static class Node<T> {
+
+        public T data;
+        public Node<T> next;
+        public Node<T> prev;
+        public Node(T data) {
+            this.data = data;
+            this.next = null;
+        }
     }
 }
