@@ -102,6 +102,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (subtask != null) {
 
             Epic epic = epics.get(subtask.getEpicId());
+
             if (epic != null) {
                 epic.getSubtasks().remove(Integer.valueOf(id));
                 updateStatusForEpic(epic);
