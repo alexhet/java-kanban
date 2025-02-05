@@ -75,7 +75,6 @@ public class InMemoryHistoryManager implements HistoryManager {
         public Node<T> prev;
         public Node(T data) {
             this.data = data;
-            this.next = null;
         }
     }
 }
