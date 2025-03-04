@@ -1,5 +1,7 @@
 package tasks;
 
+import managers.TypeOfTask;
+
 import java.util.Objects;
 
 public class Task {
@@ -7,11 +9,13 @@ public class Task {
     private String description;
     private Status status;
     private int id;
+    protected TypeOfTask type;
 
     public Task(String name, String description, Status status) {
         this.name = name;
         this.description = description;
         this.status = status;
+        this.type = TypeOfTask.TASK;
     }
 
     public String getName() {
@@ -44,6 +48,10 @@ public class Task {
 
     public void setId(int newId) {
         id = newId;
+    }
+
+    public TypeOfTask getType() {
+        return type;
     }
 
     @Override
