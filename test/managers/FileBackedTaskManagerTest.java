@@ -13,14 +13,14 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class FileBackedTaskManagerTest {
     @Test
-    public void shouldSaveAndLoadEmptyFile() throws IOException {
+    public void shouldSaveAndLoadEmptyFile() throws  IOException {
         File file = File.createTempFile("tempFile", ".csv");
         file.deleteOnExit();
 
-        FileBackedTaskManager manager = new FileBackedTaskManager(file);
+        FileBackedTaskManager manager = new FileBackedTaskManager(file, new InMemoryHistoryManager());
         manager.save();
 
-        FileBackedTaskManager loaderManager = FileBackedTaskManager.loadFromFile(file);
+        FileBackedTaskManager loaderManager = FileBackedTaskManager.loadFromFile(file, new InMemoryHistoryManager());
 
         assertTrue(loaderManager.getAllTasks().isEmpty());
         assertTrue(loaderManager.getAllSubtask().isEmpty());
@@ -32,7 +32,7 @@ class FileBackedTaskManagerTest {
         File file = File.createTempFile("tempFile", ".csv");
         file.deleteOnExit();
 
-        FileBackedTaskManager manager = new FileBackedTaskManager(file);
+        FileBackedTaskManager manager = new FileBackedTaskManager(file, new InMemoryHistoryManager());
 
         Task task1 = new Task("Task1", " ", Status.NEW);
         Task task2 = new Task("Task2", " ", Status.NEW);
@@ -52,7 +52,7 @@ class FileBackedTaskManagerTest {
         File file = File.createTempFile("tempFile", ".csv");
         file.deleteOnExit();
 
-        FileBackedTaskManager manager = new FileBackedTaskManager(file);
+        FileBackedTaskManager manager = new FileBackedTaskManager(file, new InMemoryHistoryManager());
 
         Task task1 = new Task("Task1", " ", Status.NEW);
         Task task2 = new Task("Task2", " ", Status.NEW);
@@ -61,7 +61,7 @@ class FileBackedTaskManagerTest {
         manager.addTask(task2);
         manager.save();
 
-        FileBackedTaskManager loaderManager = FileBackedTaskManager.loadFromFile(file);
+        FileBackedTaskManager loaderManager = FileBackedTaskManager.loadFromFile(file, new InMemoryHistoryManager());
 
         assertEquals(2, loaderManager.getAllTasks().size());
         assertEquals("Task1", loaderManager.getAllTasks().get(0).getName());
