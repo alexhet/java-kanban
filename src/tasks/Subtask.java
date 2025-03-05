@@ -1,6 +1,6 @@
 package tasks;
 
-public class Subtask extends Task{
+public class Subtask extends Task {
 
     private int epicId;
 
