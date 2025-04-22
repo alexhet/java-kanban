@@ -5,9 +5,9 @@ import tasks.Status;
 import tasks.Subtask;
 import tasks.Task;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class InMemoryTaskManager implements TaskManager {
     private int idCounter = 0;
@@ -27,17 +27,19 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void addTask(Task task) {
+        if (isOverlapping(task)) {
+            throw new IllegalArgumentException("Задача пересекается по времени с существующей");
+        }
         task.setId(createId());
         tasks.put(task.getId(), task);
     }
 
     @Override
     public void updateTask(Task task) {
-        if (tasks.containsKey(task.getId())) {
-            tasks.put(task.getId(), task);
-        } else {
-            System.out.println("Error");
+        if (isOverlapping(task)) {
+            throw new IllegalArgumentException("Обновлённая задача пересекается по времени");
         }
+        tasks.put(task.getId(), task);
     }
 
     @Override
@@ -122,21 +124,14 @@ public class InMemoryTaskManager implements TaskManager {
             return;
         }
 
-        boolean isAllNew = true;
-        boolean isAllDone = true;
+        List<Status> subtaskStatuses = epic.getSubtasks().stream()
+                .map(subtasks::get)
+                .filter(Objects::nonNull)
+                .map(Subtask::getStatus)
+                .collect(Collectors.toList());
 
-        for (int id : epic.getSubtasks()) {
-            Subtask subtask = subtasks.get(id);
-
-            if (subtask != null) {
-                if (subtask.getStatus() != Status.NEW) {
-                    isAllNew = false;
-                }
-                if (subtask.getStatus() != Status.DONE) {
-                    isAllDone = false;
-                }
-            }
-        }
+        boolean isAllNew = subtaskStatuses.stream().allMatch(status -> status == Status.NEW);
+        boolean isAllDone = subtaskStatuses.stream().allMatch(status -> status == Status.DONE);
 
         if (isAllNew) {
             epic.setStatus(Status.NEW);
@@ -145,24 +140,25 @@ public class InMemoryTaskManager implements TaskManager {
         } else {
             epic.setStatus(Status.IN_PROGRESS);
         }
-
     }
 
     @Override
     public void addSubtask(Subtask subtask) {
+        if (subtask.getEpicId() == subtask.getId()) {
+            throw new IllegalArgumentException("Эпик не может быть подзадачей самого себя");
+        }
+        if (isOverlapping(subtask)) {
+            throw new IllegalArgumentException("Подзадача пересекается по времени");
+        }
         subtask.setId(createId());
         subtasks.put(subtask.getId(), subtask);
-
 
         Epic epic = epics.get(subtask.getEpicId());
         if (epic != null) {
             epic.getSubtasks().add(subtask.getId());
             updateStatusForEpic(epic);
-        } else {
-            System.out.println("Ошибка: эпик не найден!");
+            epic.calculateTime(getEpicSubtasks(epic.getId()));
         }
-
-        historyManager.add(subtask);
     }
 
 
@@ -179,16 +175,14 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void updateSubtask(Subtask subtask) {
-        if (subtasks.containsKey(subtask.getId())) {
-            subtasks.put(subtask.getId(), subtask);
+        if (isOverlapping(subtask)) {
+            throw new IllegalArgumentException("Обновлённая подзадача пересекается по времени");
+        }
+        subtasks.put(subtask.getId(), subtask);
 
-            Epic epic = epics.get(subtask.getEpicId());
-
-            if (epic != null) {
-                updateStatusForEpic(epic);
-            }
-        } else {
-            System.out.println("Error");
+        Epic epic = epics.get(subtask.getEpicId());
+        if (epic != null) {
+            updateStatusForEpic(epic);
         }
     }
 
@@ -205,18 +199,16 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public List<Subtask> getEpicSubtasks(int epicId) {
         Epic epic = epics.get(epicId);
-        List<Subtask> epicSubtasks = new ArrayList<>();
-        if (epic != null) {
-            for (int subtaskId : epic.getSubtasks()) {
-                Subtask subtask = subtasks.get(subtaskId);
-                if (subtask != null) {
-                    epicSubtasks.add(subtask);
-                }
-            }
+        if (epic == null) {
+            return new ArrayList<>();
         }
+
         historyManager.add(epic);
 
-        return epicSubtasks;
+        return epic.getSubtasks().stream()
+                .map(subtasks::get)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
 
@@ -228,5 +220,11 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public List<Task> getHistory() {
         return historyManager.getHistory();
+    }
+
+    public boolean isOverlapping(Task newTask) {
+        return Stream.concat(tasks.values().stream(), subtasks.values().stream())
+                .filter(task -> task.getStartTime() != null && task.getDuration() != null)
+                .anyMatch(existingTask -> existingTask.overlapsWith(newTask));
     }
 }

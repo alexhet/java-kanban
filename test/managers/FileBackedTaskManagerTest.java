@@ -1,5 +1,6 @@
 package managers;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import tasks.Status;
 import tasks.Task;
@@ -7,65 +8,86 @@ import tasks.Task;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class FileBackedTaskManagerTest {
-    @Test
-    public void shouldSaveAndLoadEmptyFile() throws  IOException {
-        File file = File.createTempFile("tempFile", ".csv");
+    private File file;
+    private FileBackedTaskManager manager;
+
+    @BeforeEach
+    void setUp() throws IOException {
+        file = File.createTempFile("tempFile", ".csv");
         file.deleteOnExit();
-
-        FileBackedTaskManager manager = new FileBackedTaskManager(file, new InMemoryHistoryManager());
-        manager.save();
-
-        FileBackedTaskManager loaderManager = FileBackedTaskManager.loadFromFile(file, new InMemoryHistoryManager());
-
-        assertTrue(loaderManager.getAllTasks().isEmpty());
-        assertTrue(loaderManager.getAllSubtask().isEmpty());
-        assertTrue(loaderManager.getAllEpic().isEmpty());
+        manager = new FileBackedTaskManager(file, new InMemoryHistoryManager());
     }
 
     @Test
-    public void saveAndLoadMultipleTasks() throws IOException {
-        File file = File.createTempFile("tempFile", ".csv");
-        file.deleteOnExit();
+    void shouldSaveAndLoadEmptyFile() throws IOException {
+        manager.save();
+        FileBackedTaskManager loaded = FileBackedTaskManager.loadFromFile(file, new InMemoryHistoryManager());
 
-        FileBackedTaskManager manager = new FileBackedTaskManager(file, new InMemoryHistoryManager());
+        assertTrue(loaded.getAllTasks().isEmpty(),    "tasks должен быть пустым");
+        assertTrue(loaded.getAllSubtask().isEmpty(),  "subtasks должен быть пустым");
+        assertTrue(loaded.getAllEpic().isEmpty(),     "epics должен быть пустым");
+    }
 
-        Task task1 = new Task("Task1", " ", Status.NEW);
-        Task task2 = new Task("Task2", " ", Status.NEW);
-
-        manager.addTask(task1);
-        manager.addTask(task2);
+    @Test
+    void saveAndLoadMultipleTasks() throws IOException {
+        Task t1 = new Task("Task1", " ", Status.NEW);
+        Task t2 = new Task("Task2", " ", Status.NEW);
+        manager.addTask(t1);
+        manager.addTask(t2);
 
         List<String> lines = Files.readAllLines(file.toPath());
-
-        assertEquals(3, lines.size());
+        // шапка + 2 задачи
+        assertEquals(3, lines.size(), "В файле должно быть 3 строки");
         assertTrue(lines.get(1).contains("Task1"));
         assertTrue(lines.get(2).contains("Task2"));
     }
 
     @Test
-    public void loadTasksSuccessfullyFromFile() throws IOException {
-        File file = File.createTempFile("tempFile", ".csv");
-        file.deleteOnExit();
-
-        FileBackedTaskManager manager = new FileBackedTaskManager(file, new InMemoryHistoryManager());
-
-        Task task1 = new Task("Task1", " ", Status.NEW);
-        Task task2 = new Task("Task2", " ", Status.NEW);
-
-        manager.addTask(task1);
-        manager.addTask(task2);
+    void loadTasksSuccessfullyFromFile() throws IOException {
+        Task t1 = new Task("Таск1", " ", Status.NEW);
+        Task t2 = new Task("Таск2", " ", Status.NEW);
+        manager.addTask(t1);
+        manager.addTask(t2);
         manager.save();
 
-        FileBackedTaskManager loaderManager = FileBackedTaskManager.loadFromFile(file, new InMemoryHistoryManager());
+        FileBackedTaskManager loaded = FileBackedTaskManager.loadFromFile(file, new InMemoryHistoryManager());
+        List<Task> loadedTasks = loaded.getAllTasks();
 
-        assertEquals(2, loaderManager.getAllTasks().size());
-        assertEquals("Task1", loaderManager.getAllTasks().get(0).getName());
-        assertEquals("Task2", loaderManager.getAllTasks().get(1).getName());
+        assertEquals(2, loadedTasks.size(), "Должны загрузиться 2 задачи");
+        assertEquals("Таск1", loadedTasks.get(0).getName());
+        assertEquals("Таск2", loadedTasks.get(1).getName());
     }
 
+    @Test
+    void testGetPrioritizedTasks() {
+        Task t1 = new Task("Таск1", "Описание", Status.NEW,
+                Duration.ofMinutes(60), LocalDateTime.of(2025,4,1,10,0));
+        Task t2 = new Task("Таск2", "Описание", Status.NEW,
+                Duration.ofMinutes(30), LocalDateTime.of(2025,4,1,9,0));
+        Task t3 = new Task("Таск3", "Описание", Status.NEW,
+                Duration.ofMinutes(45), LocalDateTime.of(2025,4,1,11,0));
+
+        manager.addTask(t1);
+        manager.addTask(t2);
+        manager.addTask(t3);
+
+        List<Task> ordered = manager.getPrioritizedTasks();
+        assertEquals(List.of(t2, t1, t3), ordered,
+                "Приоритизация по startTime должна работать");
+    }
+
+    @Test
+    void loadFromNonexistentFileShouldThrow() {
+        File bad = new File("i_dont_exist.csv");
+        assertThrows(IOException.class, () -> {
+            FileBackedTaskManager.loadFromFile(bad, new InMemoryHistoryManager());
+        }, "Загрузка из несуществующего файла должна выкидывать IOException");
+    }
 }
