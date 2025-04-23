@@ -4,11 +4,10 @@ import managers.TypeOfTask;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 public class Subtask extends Task {
 
-    private int epicId;
+    private final int epicId;
 
     public Subtask(String name, String description, Status status, int epicId) {
         super(name, description, status, Duration.ZERO, null);
@@ -16,7 +15,6 @@ public class Subtask extends Task {
         this.type = TypeOfTask.SUBTASK;
     }
 
-    // Исправленный порядок параметров: сначала duration, потом startTime
     public Subtask(String name, String description, Status status, int epicId,
                    Duration duration, LocalDateTime startTime) {
         super(name, description, status, duration, startTime);
