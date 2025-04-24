@@ -15,7 +15,6 @@ public class Task {
     private Duration duration;
     private LocalDateTime startTime;
 
-    // Основной конструктор
     public Task(String name, String description, Status status, Duration duration, LocalDateTime startTime) {
         this.name = name;
         this.description = description;
@@ -25,7 +24,6 @@ public class Task {
         this.startTime = startTime;
     }
 
-    // Делегируем в основной, чтобы type всегда = TASK
     public Task(String name, String description, Status status) {
         this(name, description, status, null, null);
     }
@@ -59,7 +57,7 @@ public class Task {
     }
 
     public void setId(int newId) {
-        id = newId;
+        this.id = newId;
     }
 
     public TypeOfTask getType() {
@@ -83,18 +81,21 @@ public class Task {
     }
 
     public LocalDateTime getEndTime() {
+        if (startTime == null || duration == null) {
+            return null;
+        }
         return startTime.plus(duration);
     }
 
     public boolean overlapsWith(Task otherTask) {
-        if (this.startTime == null || otherTask.startTime == null || this.duration == null || otherTask.duration == null) {
+        if (this.getStartTime() == null || otherTask.getStartTime() == null
+                || this.getDuration() == null || otherTask.getDuration() == null) {
             return false;
         }
-        LocalDateTime thisEnd = this.startTime.plus(this.duration);
-        LocalDateTime otherEnd = otherTask.startTime.plus(otherTask.duration);
-        return this.startTime.isBefore(otherEnd) && thisEnd.isAfter(otherTask.startTime);
+        LocalDateTime thisEnd = this.getEndTime();
+        LocalDateTime otherEnd = otherTask.getEndTime();
+        return this.getStartTime().isBefore(otherEnd) && thisEnd.isAfter(otherTask.getStartTime());
     }
-
 
     @Override
     public String toString() {
@@ -114,13 +115,12 @@ public class Task {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         Task task = (Task) obj;
-        return id == task.id && // Сравнение по id
+        return id == task.id &&
                 Objects.equals(name, task.name) &&
                 Objects.equals(description, task.description) &&
-                Objects.equals(status, task.status) &&
+                status == task.status &&
                 Objects.equals(duration, task.duration) &&
                 Objects.equals(startTime, task.startTime);
-
     }
 
     @Override
