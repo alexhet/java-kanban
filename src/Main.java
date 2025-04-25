@@ -5,6 +5,9 @@ import tasks.Status;
 import tasks.Subtask;
 import tasks.Task;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+
 public class Main {
 
     public static void main(String[] args) {
@@ -12,8 +15,8 @@ public class Main {
         TaskManager taskManager = Managers.getDefault();
 
         // Создаем задачи и добавляем их в managers.TaskManager
-        Task task1 = new Task("Закупка продуктов", "Купить все для праздничного ужина.", Status.NEW);
-        Task task2 = new Task("Планирование тренировки", "Составить план тренировок на месяц.", Status.NEW);
+        Task task1 = new Task("Закупка продуктов", "Купить все для праздничного ужина.", Status.NEW, Duration.ofMinutes(60), LocalDateTime.now());
+        Task task2 = new Task("Планирование тренировки", "Составить план тренировок на месяц.", Status.NEW, Duration.ofMinutes(60), LocalDateTime.now());
         taskManager.addTask(task1);
         taskManager.addTask(task2);
 

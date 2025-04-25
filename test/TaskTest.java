@@ -1,26 +1,89 @@
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import tasks.Status;
-import tasks.Subtask;
 import tasks.Task;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class TaskTest {
-    @Test
-    void tasksAreEqualIfIdsAreEqual() {
-        Task task1 = new Task("tasks.Task 1", "", Status.NEW);
-        Task task2 = new Task("tasks.Task 1", "", Status.NEW);
-        task1.setId(1);
-        task2.setId(1);
-        assertEquals(task1, task2, "Tаски с одинаковым ID должны быть равны");
+    private LocalDateTime base;
+
+    @BeforeEach
+    void setUp() {
+        base = LocalDateTime.of(2025,4,1,10,0);
     }
 
     @Test
-    void subtasksAreEqualIfIdsAreEqual() {
-        Subtask subtask1 = new Subtask("tasks.Subtask 1", "", Status.NEW, 0);
-        Subtask subtask2 = new Subtask("tasks.Subtask 1", "", Status.NEW, 0);
-        subtask1.setId(1);
-        subtask2.setId(1);
-        assertEquals(subtask1, subtask2, "Субтаски с одинаковым ID должны быть равны");
+    void equalById() {
+        Task a = new Task("Таск","", Status.NEW);
+        Task b = new Task("Таск","", Status.NEW);
+        a.setId(5);
+        b.setId(5);
+        assertEquals(a, b);
+    }
+
+    @Test
+    void partialOverlap() {
+        Task a = new Task("Таск1","", Status.NEW,
+                Duration.ofMinutes(60), base);
+        Task b = new Task("Таск2","", Status.NEW,
+                Duration.ofMinutes(60), base.plusMinutes(30));
+        assertTrue(a.overlapsWith(b));
+    }
+
+    @Test
+    void fullOverlap() {
+        Task a = new Task("Таск1","", Status.NEW,
+                Duration.ofMinutes(60), base);
+        Task b = new Task("Таск2","", Status.NEW,
+                Duration.ofMinutes(60), base);
+        assertTrue(a.overlapsWith(b));
+    }
+
+    @Test
+    void containedOverlap() {
+        Task a = new Task("Таск1","", Status.NEW,
+                Duration.ofMinutes(120), base);
+        Task b = new Task("Таск2","", Status.NEW,
+                Duration.ofMinutes(30), base.plusMinutes(30));
+        assertTrue(a.overlapsWith(b));
+    }
+
+    @Test
+    void noOverlap() {
+        Task a = new Task("Таск1","", Status.NEW,
+                Duration.ofMinutes(60), base);
+        Task b = new Task("Таск2","", Status.NEW,
+                Duration.ofMinutes(60), base.plusHours(2));
+        assertFalse(a.overlapsWith(b));
+    }
+
+    @Test
+    void touchingNoOverlap() {
+        Task a = new Task("Таск1","", Status.NEW,
+                Duration.ofMinutes(60), base);
+        Task b = new Task("Таск2","", Status.NEW,
+                Duration.ofMinutes(60), base.plusMinutes(60));
+        assertFalse(a.overlapsWith(b));
+    }
+
+    @Test
+    void nullStartOrNullDurationNoOverlap() {
+        Task a = new Task("Таск1","", Status.NEW, null, base);
+        Task b = new Task("Таск2","", Status.NEW,
+                Duration.ofMinutes(60), null);
+        assertFalse(a.overlapsWith(b));
+    }
+
+    @Test
+    void zeroDurationNoOverlap() {
+        Task a = new Task("Таск1","", Status.NEW,
+                Duration.ZERO, base);
+        Task b = new Task("Таск2","", Status.NEW,
+                Duration.ofMinutes(60), base);
+        assertFalse(a.overlapsWith(b));
     }
 }
