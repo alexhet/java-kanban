@@ -12,7 +12,6 @@ import tasks.Subtask;
 import tasks.Task;
 
 import java.io.IOException;
-import java.lang.reflect.Modifier;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -206,7 +205,7 @@ class HttpTaskServerTest {
         assertEquals(404, resp.statusCode());
     }
 
-    //  /prioritized 
+    //  /prioritized
 
     @Test
     void getEmptyPrioritized() throws IOException, InterruptedException {
