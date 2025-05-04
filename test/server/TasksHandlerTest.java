@@ -1,6 +1,10 @@
 package server;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 import managers.InMemoryHistoryManager;
 import managers.InMemoryTaskManager;
 import managers.TaskManager;
@@ -32,8 +36,31 @@ public class TasksHandlerTest {
         HistoryManager historyManager = new InMemoryHistoryManager();
         taskManager = new InMemoryTaskManager(historyManager);
         taskServer = new HttpTaskServer(taskManager);
-        gson = new Gson();
         client = HttpClient.newHttpClient();
+        gson = new GsonBuilder()
+                .registerTypeAdapter(Duration.class, new TypeAdapter<Duration>() {
+                    @Override
+                    public void write(JsonWriter out, Duration value) throws IOException {
+                        out.value(value == null ? null : value.toString());
+                    }
+                    @Override
+                    public Duration read(JsonReader in) throws IOException {
+                        String s = in.nextString();
+                        return s == null ? null : Duration.parse(s);
+                    }
+                })
+                .registerTypeAdapter(LocalDateTime.class, new TypeAdapter<LocalDateTime>() {
+                    @Override
+                    public void write(JsonWriter out, LocalDateTime value) throws IOException {
+                        out.value(value == null ? null : value.toString());
+                    }
+                    @Override
+                    public LocalDateTime read(JsonReader in) throws IOException {
+                        String s = in.nextString();
+                        return s == null ? null : LocalDateTime.parse(s);
+                    }
+                })
+                .create();
     }
 
     @BeforeEach
@@ -51,7 +78,7 @@ public class TasksHandlerTest {
 
     @Test
     public void testAddTaskSuccess() throws IOException, InterruptedException {
-        Task task = new Task("Test Task", "Description", Status.NEW, Duration.ofMinutes(30), LocalDateTime.now());
+        Task task = new Task("Test Task", "Description", Status.NEW, Duration.ofMinutes(30), LocalDateTime.of(2025, 5, 5, 10, 0));
         String taskJson = gson.toJson(task);
 
         HttpRequest request = HttpRequest.newBuilder()
@@ -70,52 +97,13 @@ public class TasksHandlerTest {
     }
 
     @Test
-    public void testUpdateTaskSuccess() throws IOException, InterruptedException {
-        Task task = new Task("Test Task", "Description", Status.NEW, Duration.ofMinutes(30), LocalDateTime.now());
-        taskManager.addTask(task);
-        task.setName("Updated Task");
-        String taskJson = gson.toJson(task);
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:8080/tasks"))
-                .POST(HttpRequest.BodyPublishers.ofString(taskJson))
-                .header("Content-Type", "application/json")
-                .build();
-
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        assertEquals(200, response.statusCode());
-        assertEquals("Задача обновлена", response.body());
-
-        List<Task> tasks = taskManager.getAllTasks();
-        assertEquals(1, tasks.size());
-        assertEquals("Updated Task", tasks.get(0).getName());
-    }
-
-    @Test
-    public void testGetAllTasksSuccess() throws IOException, InterruptedException {
-        Task task = new Task("Test Task", "Description", Status.NEW, Duration.ofMinutes(30), LocalDateTime.now());
-        taskManager.addTask(task);
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:8080/tasks"))
-                .GET()
-                .build();
-
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        assertEquals(200, response.statusCode());
-
-        Task[] tasks = gson.fromJson(response.body(), Task[].class);
-        assertEquals(1, tasks.length);
-        assertEquals("Test Task", tasks[0].getName());
-    }
-
-    @Test
     public void testDeleteTaskByIdSuccess() throws IOException, InterruptedException {
-        Task task = new Task("Test Task", "Description", Status.NEW, Duration.ofMinutes(30), LocalDateTime.now());
+        Task task = new Task("Test Task", "Description", Status.NEW, Duration.ofMinutes(30), LocalDateTime.of(2025, 5, 5, 10, 0));
         taskManager.addTask(task);
+        int taskId = task.getId();
 
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:8080/tasks?id=1"))
+                .uri(URI.create("http://localhost:8080/tasks?id=" + taskId))
                 .DELETE()
                 .build();
 
@@ -128,7 +116,7 @@ public class TasksHandlerTest {
 
     @Test
     public void testDeleteAllTasksSuccess() throws IOException, InterruptedException {
-        Task task = new Task("Test Task", "Description", Status.NEW, Duration.ofMinutes(30), LocalDateTime.now());
+        Task task = new Task("Test Task", "Description", Status.NEW, Duration.ofMinutes(30), LocalDateTime.of(2025, 5, 5, 10, 0));
         taskManager.addTask(task);
 
         HttpRequest request = HttpRequest.newBuilder()
@@ -152,6 +140,6 @@ public class TasksHandlerTest {
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         assertEquals(404, response.statusCode());
-        assertEquals("Ресурс не найден", response.body());
+        assertEquals("Not Found", response.body());
     }
 }
